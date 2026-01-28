@@ -7,12 +7,18 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include(FetchContent)
 FetchContent_Declare(SFML
         GIT_REPOSITORY https://github.com/SFML/SFML.git
-        GIT_TAG 2.6.x
+        GIT_TAG 2.6.1
         GIT_SHALLOW ON)
 FetchContent_MakeAvailable(SFML)
 
 set(SOURCE_FILES
         src/Main.cpp
+        src/Scenes/uon_splashscreen.cpp
+        src/Scenes/studio_splashscreen.cpp
+        src/Scene.cpp
+        src/SceneManager.cpp
+        src/Scenes/gameplay.cpp
+        src/Scenes/ui_test.cpp
 )
 
 add_executable(Gambling ${SOURCE_FILES})
@@ -39,8 +45,8 @@ endif ()
 
 add_custom_command(TARGET Gambling POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_CURRENT_SOURCE_DIR}/Assets
-        $<TARGET_FILE_DIR:Gambling>/Assets
+        ${CMAKE_CURRENT_SOURCE_DIR}/assets
+        $<TARGET_FILE_DIR:Gambling>/assets
 )
 
 add_custom_command(TARGET Gambling POST_BUILD

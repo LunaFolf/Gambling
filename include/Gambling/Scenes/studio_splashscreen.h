@@ -3,13 +3,13 @@
 #include "SFML/Graphics/Texture.hpp"
 #include "SFML/Graphics/Sprite.hpp"
 
-class UONSplashscreenScene : public Scene {
+class StudioSplashScreenScene : public Scene {
 public:
     sf::Texture logoTexture;
     sf::Sprite logoSprite;
     bool fadingIn = true;
     float fadeTime = 1.5f;
-    UONSplashscreenScene();
+    StudioSplashScreenScene();
 
     void start();
 

@@ -2,14 +2,15 @@
 #include <SFML/Graphics.hpp>
 
 #include "Gambling/Scene.h"
+#include "Gambling/Scenes/gameplay.h"
+#include "Gambling/Scenes/studio_splashscreen.h"
+#include "Gambling/Scenes/ui_test.h"
 #include "Gambling/Scenes/uon_splashscreen.h"
 
 
 using namespace std;
 
 int main() {
-	// sf::Vector2i monitorRes(sf::VideoMode::getDesktopMode().width, sf::VideoMode::getDesktopMode().height);
-
 	sf::Vector2i RESOLUTION(720.f, 576.f);
 	sf::VideoMode VIDEO_MODE(RESOLUTION.x, RESOLUTION.y);
 	sf::RenderWindow GAME_WINDOW(
@@ -18,28 +19,21 @@ int main() {
 		sf::Style::None
 		);
 
-	// Seed randomise function with the current time.
+	GAME_WINDOW.setMouseCursorVisible(false);
+
 	srand(time(nullptr));
 
-	sf::Texture texture;
-	sf::Sprite sprite;
+	sf::RectangleShape bg_rect(sf::Vector2f(RESOLUTION.x, RESOLUTION.y));
+	bg_rect.setFillColor(sf::Color::Black);
+	sf::Clock deltaClock;
 
-	texture.loadFromFile("Assets/demo.png");
-	sprite.setTexture(texture);
+	auto* sceneManager = new SceneManager(&GAME_WINDOW);
+	sceneManager->addScene(new UONSplashscreenScene());
+	sceneManager->addScene(new StudioSplashScreenScene());
+	sceneManager->addScene(new UITestScene());
+	sceneManager->addScene(new GameplayScene());
 
-	sf::Texture sansTexture;
-	sf::Sprite sansSprite;
-
-	sansTexture.loadFromFile("Assets/sans.png");
-	sansSprite.setTexture(sansTexture);
-
-	float playerXAccel = 0, playerYAccel = 0;
-
-	sf::Clock clock;
-
-	Scene* sceneList[1] = {
-		new UONSplashscreenScene()
-	};
+	sceneManager->changeScene(2);
 
 	// Main Loop
 	while (GAME_WINDOW.isOpen()) {
@@ -56,28 +50,16 @@ int main() {
 				}
 			}
 
-			if (event.type == sf::Event::JoystickMoved) {
-				switch (event.joystickMove.axis) {
-					case sf::Joystick::Axis::X:
-						playerXAccel = event.joystickMove.position;
-						break;
-					case sf::Joystick::Axis::Y:
-						playerYAccel = event.joystickMove.position;
-						break;
-				}
-			}
+			sceneManager->eventHandler(event);
 		}
 
-		float deltaTime = clock.restart().asSeconds();
+		float deltaTime = deltaClock.restart().asSeconds();
 
-		if (abs(playerXAccel) < 20.f) playerXAccel = 0;
-		if (abs(playerYAccel) < 20.f) playerYAccel = 0;
-
-		sansSprite.move(playerXAccel * 2 * deltaTime, playerYAccel * 2 * deltaTime);
+		sceneManager->update(deltaTime);
 
 		GAME_WINDOW.clear();
-		GAME_WINDOW.draw(sprite);
-		GAME_WINDOW.draw(sansSprite);
+		GAME_WINDOW.draw(bg_rect);
+		sceneManager->render(GAME_WINDOW);
 		GAME_WINDOW.display();
 	}
 

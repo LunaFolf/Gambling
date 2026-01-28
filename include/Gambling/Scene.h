@@ -1,10 +1,20 @@
 #pragma once
+#include <string>
+
+#include "SceneManager.h"
 
 class Scene {
+private:
 public:
-    Scene();
+    SceneManager* sceneManager;
+    sf::Clock clock;
+    std::string name;
 
-    void update();
+    Scene(std::string _name);
+    void setSceneManager(SceneManager* _sceneManager);
 
-    void render();
+    virtual void start();
+    virtual void update(float deltaTime);
+    virtual void render(sf::RenderWindow& window);
+    virtual void eventHandler(sf::Event& event);
 };
