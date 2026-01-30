@@ -6,6 +6,7 @@
 #include "Gambling/Scenes/gameplay.h"
 #include "Gambling/Scenes/intro.h"
 #include "Gambling/Scenes/mainmenu.h"
+#include "Gambling/Scenes/gameover.h"
 #include "Gambling/Scenes/pegi_splashscreen.h"
 #include "Gambling/Scenes/shoot.h"
 #include "Gambling/Scenes/studio_splashscreen.h"
@@ -46,8 +47,9 @@ int main() {
 	sceneManager->addScene(new IntroScene());
 	sceneManager->addScene(new GameplayScene(gameManager));
 	sceneManager->addScene(new ShootScene(gameManager));
+	sceneManager->addScene(new GameOverScene(gameManager));
 
-	sceneManager->changeScene(5);
+	sceneManager->changeScene(0);
 
 	// Main Loop
 	while (GAME_WINDOW.isOpen()) {

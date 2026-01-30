@@ -30,9 +30,11 @@ IntroScene::IntroScene() : Scene("Intro") {
                             this->sceneManager->nextScene();
                         }
                     ));
-                }
+                },
+                true
             ));
-        }
+        },
+        true
     ));
 }
 

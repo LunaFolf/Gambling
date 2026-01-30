@@ -12,13 +12,15 @@ Dialogue::Dialogue(
     const Voice voice,
     const std::string& spritePath,
     const float pitch,
-    const std::function<void()>& onFinish
+    const std::function<void()>& onFinish,
+    const bool autoSkip
     ) {
     text = _text;
     position = _position;
     defaultPitch = pitch;
     chosenVoice = voice;
     onFinishCallback = onFinish;
+    _autoSkip = autoSkip;
 
     setup(spritePath);
 }
@@ -30,13 +32,15 @@ Dialogue::Dialogue(
     const Voice voice,
     const std::string& spritePath,
     const float pitch,
-    const std::function<void()>& onFinish
+    const std::function<void()>& onFinish,
+    const bool autoSkip
     ) {
     text = _text;
     position = sf::Vector2f(_x, _y);
     defaultPitch = pitch;
     chosenVoice = voice;
     onFinishCallback = onFinish;
+    _autoSkip = autoSkip;
 
     setup(spritePath);
 }
@@ -101,7 +105,7 @@ void Dialogue::render(sf::RenderWindow& window) {
 void Dialogue::update(const float deltaTime) {
     if (_isDone) return;
 
-    if (_playerHasAdvanced) {
+    if ((_autoSkip && autoSkipDelta > dialogueText.getString().getSize() / 65) || _playerHasAdvanced) {
         _isDone = true;
         if (onFinishCallback) onFinishCallback();
         return;
@@ -110,8 +114,9 @@ void Dialogue::update(const float deltaTime) {
 
     if (text.empty()) {
         _isFinishedSpeaking = true;
+        autoSkipDelta += deltaTime;
 
-        if (continuePromptSprite.getColor().a < 255) {
+        if (!_autoSkip && continuePromptSprite.getColor().a < 255) {
             continuePromptSprite.setColor({255, 255, 255, 255});
             continuePromptText.setFillColor(sf::Color::White);
             continuePromptText.setOutlineColor(sf::Color::Black);
@@ -172,6 +177,7 @@ void Dialogue::update(const float deltaTime) {
     continuePromptText.setPosition(continuePromptSprite.getPosition().x + continuePromptSprite.getGlobalBounds().width + 8, continuePromptSprite.getPosition().y - 8);
 
     sound.setPitch(defaultPitch + ((std::rand() % 25) / 100.f) - .125f);
+    if (sound.getStatus() == sf::SoundSource::Status::Playing) return;
     sound.play();
 }
 

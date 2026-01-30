@@ -4,7 +4,13 @@ project(Gambling)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+if (MSVC)
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+endif()
+
 include(FetchContent)
+set(BUILD_SHARED_LIBS OFF)
+set(SFML_STATIC_LIBRARIES ON)
 FetchContent_Declare(SFML
         GIT_REPOSITORY https://github.com/SFML/SFML.git
         GIT_TAG 2.6.1
@@ -22,6 +28,7 @@ set(SOURCE_FILES
         src/Scenes/gameplay.cpp
         src/Scenes/ui_test.cpp
         src/Scenes/mainmenu.cpp
+        src/Scenes/gameover.cpp
         src/Dialogue.cpp
         src/Scenes/shoot.cpp
         src/GameManager.cpp
@@ -33,6 +40,8 @@ target_include_directories(Gambling
         PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
+
+target_compile_definitions(Gambling PRIVATE SFML_STATIC)
 
 target_link_libraries(Gambling
         sfml-graphics
@@ -53,15 +62,6 @@ add_custom_command(TARGET Gambling POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_CURRENT_SOURCE_DIR}/assets
         $<TARGET_FILE_DIR:Gambling>/assets
-)
-
-add_custom_command(TARGET Gambling POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        $<TARGET_FILE:sfml-graphics>
-        $<TARGET_FILE:sfml-window>
-        $<TARGET_FILE:sfml-system>
-        $<TARGET_FILE:sfml-audio>
-        $<TARGET_FILE_DIR:Gambling>
 )
 
 add_custom_command(TARGET Gambling POST_BUILD

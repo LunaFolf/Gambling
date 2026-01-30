@@ -11,6 +11,9 @@ GameplayScene::GameplayScene(GameManager* _gameManager) : Scene("Main Gameplay")
 
     gameManager = _gameManager;
 
+    reloadBuffer.loadFromFile("assets/sfx/clipload1.wav");
+    reloadSound.setBuffer(reloadBuffer);
+
     font.loadFromFile("assets/fonts/ithaca.ttf");
 
     ltTexture.loadFromFile("assets/sprites/ps/LeftTrigger2.png");
@@ -96,7 +99,7 @@ GameplayScene::GameplayScene(GameManager* _gameManager) : Scene("Main Gameplay")
         [this]() {
             toggleMoneyVisible(true);
             setMoney(-1000);
-            setMoney(-1);
+            gameManager->addMoneyEarned(-1000);
 
             this->addDialogue(new Dialogue(
                 "This is your debt...\n"
@@ -170,7 +173,8 @@ GameplayScene::GameplayScene(GameManager* _gameManager) : Scene("Main Gameplay")
                                                             ));
                                                         }
                                                     ));
-                                                }
+                                                },
+                                                true
                                             ));
                                         }
                                     ));
@@ -180,7 +184,8 @@ GameplayScene::GameplayScene(GameManager* _gameManager) : Scene("Main Gameplay")
                     ));
                 }
             ));
-        }
+        },
+        true
     ));
 
     setMoney(0);
@@ -212,12 +217,16 @@ void GameplayScene::setMoney(const int money) {
 
 void GameplayScene::generateBullets() {
     bullets.clear();
-
     bullets.reserve(currentDifficulty);
 
-    for (int i = 0; i < currentDifficulty; i++) {
+    for (int i = currentDifficulty - 1; i >= 0; i--) {
         bool isBulletLive = rand() % 2 == 0;
         bullets.push_back(isBulletLive);
+
+        reloadSound.setPitch(isBulletLive ? 1.25f : 0.75f);
+        reloadSound.play();
+
+        while (reloadSound.getStatus() == sf::SoundSource::Status::Playing) {}
     }
 
     for (int i = 0; i < bullets.size(); i++) {
@@ -325,8 +334,9 @@ void GameplayScene::doubleOrNothingPrompt() {
         "assets/sprites/SpriteEVILRIVAL.png",
         1.f,
         [this]() {
-
-        }
+            sceneManager->changeScene(7);
+        },
+        true
     ));
 }
 
@@ -344,7 +354,8 @@ void GameplayScene::aiTurn() {
             aiShootSelf = rand() % 2 == 0;
             std::cout << "shooting: " << (aiShootSelf ?"self":"rival") << std::endl;
             aiAiming = true;
-        }
+        },
+        true
     ));
 }
 
@@ -387,7 +398,10 @@ void GameplayScene::aiShoot() {
                     toggleLTPrompt(true);
                     toggleRTPrompt(true);
                     toggleGunVisible(true);
-                }
+
+                    if (bullets.size() < 1) generateBullets();
+                },
+                true
             ));
         } else {
             this->addDialogue(new Dialogue(
@@ -401,7 +415,10 @@ void GameplayScene::aiShoot() {
                     toggleLTPrompt(true);
                     toggleRTPrompt(true);
                     toggleGunVisible(true);
-                }
+
+                    if (bullets.size() < 1) generateBullets();
+            },
+            true
             ));
         }
     } else {
@@ -435,10 +452,23 @@ void GameplayScene::aiShoot() {
                     playersTurn = true;
                     toggleLTPrompt(true);
                     toggleRTPrompt(true);
-                    toggleMoneyVisible(true);
-                }
+                    toggleGunVisible(true);
+
+                    if (bullets.size() < 1) generateBullets();
+            },
+            true
             ));
         } else {
+            gameManager->addMoneyEarned(100);
+
+            actualMoney -= 100;
+            setMoney(actualMoney);
+
+            if (actualMoney >= 0) {
+                doubleOrNothingPrompt();
+                return;
+            }
+
             this->addDialogue(new Dialogue(
                 "Huh... must be your lucky day...",
                 {8, 8},
@@ -449,13 +479,14 @@ void GameplayScene::aiShoot() {
                     playersTurn = true;
                     toggleLTPrompt(true);
                     toggleRTPrompt(true);
-                    toggleMoneyVisible(true);
-                }
+                    toggleGunVisible(true);
+
+                    if (bullets.size() < 1) generateBullets();
+            },
+            true
             ));
         }
     }
-
-    if (bullets.size() < 1) generateBullets();
 
     rotateMoveGun(0);
 }
@@ -498,14 +529,57 @@ void GameplayScene::eventHandler(sf::Event &event) {
 
                     if (bulletIsLive) {
                         gameManager->addShotsFired(1);
+
+                        gameManager->addMoneyEarned(-200);
+
+                        actualMoney -= 200;
+                        setMoney(actualMoney);
+
+                        this->addDialogue(new Dialogue(
+                            "* Z A P *\n"
+                            "What? You thought we'd let you get out your debt THAT easy?\n"
+                            "Finish the game!\n"
+                            "Oh, by the way, that revive cost you an extra $200.",
+                            {8, 8},
+                            Dialogue::Voice::evilgungler,
+                            "assets/sprites/SpriteEVILRIVAL.png",
+                            1.f,
+                            [this]() {
+                                playersTurn = false;
+                                toggleLTPrompt(false);
+                                toggleRTPrompt(false);
+
+                                if (bullets.size() < 1) generateBullets();
+
+                                aiTurn();
+                        },
+            true
+                        ));
                     } else {
                         gameManager->addMoneyEarned(200);
 
                         actualMoney += 200;
                         setMoney(actualMoney);
+
+                        this->addDialogue(new Dialogue(
+                            "What the... you better not be cheatin' cretin...",
+                            {8, 8},
+                            Dialogue::Voice::evilgungler,
+                            "assets/sprites/SpriteEVILRIVAL.png",
+                            1.f,
+                            [this]() {
+                                toggleGunVisible(true);
+                                toggleLTPrompt(true);
+                                toggleRTPrompt(true);
+
+                                if (bullets.size() < 1) generateBullets();
+                        },
+            true
+                        ));
                     }
 
                     if (actualMoney >= 0) {
+                        std::cout << "money: " << actualMoney << std::endl;
                         doubleOrNothingPrompt();
                         return;
                     }
@@ -537,8 +611,12 @@ void GameplayScene::eventHandler(sf::Event &event) {
                             1.f,
                             [this]() {
                                 playersTurn = false;
+
+                                if (bullets.size() < 1) generateBullets();
+
                                 aiTurn();
-                            }
+                        },
+            true
                         ));
                     } else {
                         this->addDialogue(new Dialogue(
@@ -549,13 +627,15 @@ void GameplayScene::eventHandler(sf::Event &event) {
                             1.f,
                             [this]() {
                                 playersTurn = false;
+
+                                if (bullets.size() < 1) generateBullets();
+
                                 aiTurn();
-                            }
+                        },
+            true
                         ));
                     }
                 }
-
-                if (bullets.size() < 1) generateBullets();
 
                 rotateMoveGun(0);
 

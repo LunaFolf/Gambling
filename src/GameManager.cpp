@@ -1,10 +1,14 @@
+#include <iostream>
+#include <ostream>
 #include <Gambling/GameManager.h>
 
 GameManager::GameManager() {
+    std::cout << "GameManager created" << std::endl;
     reset();
 }
 
 void GameManager::reset() {
+    std::cout << "GameManager reset" << std::endl;
     shotsFired = 0;
     rivalsKilled = 0;
     moneyEarned = 0;

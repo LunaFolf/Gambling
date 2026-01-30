@@ -44,8 +44,10 @@ private:
 
     Voice chosenVoice = gungler;
 
-    bool _mustFinishDialogueToAdvance = false;
+    bool _mustFinishDialogueToAdvance = true;
 
+    float autoSkipDelta = 0.f;
+    bool _autoSkip = false;
     bool _isFinishedSpeaking = false;
     bool _playerHasAdvanced = false;
     bool _isDone = false;
@@ -68,7 +70,8 @@ public:
         Voice voice = gungler,
         const std::string& spritePath = "",
         const float pitch = 1.f,
-        const std::function<void()>& onFinish = [](){}
+        const std::function<void()>& onFinish = [](){},
+        bool autoSkip = false
         );
     Dialogue(
         const std::string& _text,
@@ -77,7 +80,8 @@ public:
         Voice voice = gungler,
         const std::string& spritePath = "",
         const float pitch = 1.f,
-        const std::function<void()>& onFinish = [](){}
+        const std::function<void()>& onFinish = [](){},
+        bool autoSkip = false
         );
 
     std::string getText();

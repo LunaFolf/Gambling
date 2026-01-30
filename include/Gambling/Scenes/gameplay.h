@@ -20,6 +20,9 @@ public:
     int actualMoney = 0;
     int displayMoney = 0;
 
+    sf::SoundBuffer reloadBuffer;
+    sf::Sound reloadSound;
+
     sf::Texture moneyTexture;
     sf::Sprite moneySprite;
 
@@ -65,7 +68,7 @@ public:
     sf::Vector2f getMoneyDialoguePos() const;
     sf::Vector2f getBulletsDialoguePos() const;
     sf::Vector2f getGunDialoguePos() const;
-    Difficulty currentDifficulty = easy;
+    Difficulty currentDifficulty = medium;
 
     bool playersTurn = false;
 
