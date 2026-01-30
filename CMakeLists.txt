@@ -13,14 +13,18 @@ FetchContent_MakeAvailable(SFML)
 
 set(SOURCE_FILES
         src/Main.cpp
+        src/Scenes/pegi_splashscreen.cpp
         src/Scenes/uon_splashscreen.cpp
         src/Scenes/studio_splashscreen.cpp
         src/Scene.cpp
         src/SceneManager.cpp
+        src/Scenes/intro.cpp
         src/Scenes/gameplay.cpp
         src/Scenes/ui_test.cpp
         src/Scenes/mainmenu.cpp
         src/Dialogue.cpp
+        src/Scenes/shoot.cpp
+        src/GameManager.cpp
 )
 
 add_executable(Gambling ${SOURCE_FILES})

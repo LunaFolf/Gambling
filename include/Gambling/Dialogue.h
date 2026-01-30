@@ -30,6 +30,10 @@ private:
     sf::Texture spriteTexture;
     sf::Sprite spriteSprite;
 
+    sf::Texture continuePromptTexture;
+    sf::Sprite continuePromptSprite;
+    sf::Text continuePromptText;
+
     sf::SoundBuffer soundBuffer;
     sf::Sound sound;
 

@@ -22,7 +22,7 @@ void StudioSplashScreenScene::update (const float deltaTime) {
         fadingIn = false;
         this->clock.restart();
     } else if (!fadingIn && this->clock.getElapsedTime().asSeconds() > fadeTime) {
-        this->sceneManager->changeScene(2);
+        this->sceneManager->nextScene();
         delete this;
         return;
     }

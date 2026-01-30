@@ -19,6 +19,8 @@ public:
     void render(sf::RenderWindow& window);
 
     void changeScene(int index);
+    void nextScene();
+    void previousScene();
 
     void eventHandler(sf::Event& event);
 

@@ -1,9 +1,13 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
 
+#include "Gambling/GameManager.h"
 #include "Gambling/Scene.h"
 #include "Gambling/Scenes/gameplay.h"
+#include "Gambling/Scenes/intro.h"
 #include "Gambling/Scenes/mainmenu.h"
+#include "Gambling/Scenes/pegi_splashscreen.h"
+#include "Gambling/Scenes/shoot.h"
 #include "Gambling/Scenes/studio_splashscreen.h"
 #include "Gambling/Scenes/ui_test.h"
 #include "Gambling/Scenes/uon_splashscreen.h"
@@ -32,14 +36,18 @@ int main() {
 	bg_rect.setFillColor(sf::Color::Black);
 	sf::Clock deltaClock;
 
+	auto* gameManager = new GameManager();
+
 	auto* sceneManager = new SceneManager(&GAME_WINDOW);
 	sceneManager->addScene(new UONSplashscreenScene());
 	sceneManager->addScene(new StudioSplashScreenScene());
-	// sceneManager->addScene(new UITestScene());
+	sceneManager->addScene(new PEGISplashscreenScene());
 	sceneManager->addScene(new MainMenuScene());
-	sceneManager->addScene(new GameplayScene());
+	sceneManager->addScene(new IntroScene());
+	sceneManager->addScene(new GameplayScene(gameManager));
+	sceneManager->addScene(new ShootScene(gameManager));
 
-	sceneManager->changeScene(0);
+	sceneManager->changeScene(5);
 
 	// Main Loop
 	while (GAME_WINDOW.isOpen()) {

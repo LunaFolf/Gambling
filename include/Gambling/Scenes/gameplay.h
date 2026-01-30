@@ -1,4 +1,5 @@
 #pragma once
+#include "Gambling/GameManager.h"
 #include "Gambling/Scene.h"
 #include "SFML/Graphics/Font.hpp"
 #include "SFML/Graphics/Texture.hpp"
@@ -7,11 +8,17 @@
 
 class GameplayScene : public Scene {
 public:
+    GameManager* gameManager;
+
     sf::Texture backgroundTexture;
     sf::Sprite backgroundSprite;
 
-    sf::Texture livesTextures;
-    sf::Sprite livesSprite;
+    sf::Texture bulletsTexture;
+    sf::Sprite bulletsSprite;
+
+    float moneyDeltaCount = 0.f;
+    int actualMoney = 0;
+    int displayMoney = 0;
 
     sf::Texture moneyTexture;
     sf::Sprite moneySprite;
@@ -24,13 +31,26 @@ public:
 
     sf::Font font;
     sf::Text moneyText;
+    sf::Text bulletsText;
+
+    sf::Texture ltTexture;
+    sf::Sprite ltSprite;
+
+    sf::Texture rtTexture;
+    sf::Sprite rtSprite;
+
+    sf::Text ltText;
+    sf::Text rtText;
 
     bool isGunVisible = false;
-    bool isLivesVisible = false;
+    bool isBulletsVisible = false;
     bool isMoneyVisible = false;
 
+    bool isLTPromptVisible = false;
+    bool isRTPromptVisible = false;
+
     bool darkMode = false;
-    std::vector<bool> shells = {};
+    std::vector<bool> bullets = {};
 
     enum Difficulty {
         easy = 2,
@@ -38,12 +58,16 @@ public:
         hard = 8
     };
 
+    sf::Vector2f getMoneyDialoguePos() const;
+    sf::Vector2f getBulletsDialoguePos() const;
+    sf::Vector2f getGunDialoguePos() const;
     Difficulty currentDifficulty = easy;
 
     bool playersTurn = true;
 
-    GameplayScene();
+    GameplayScene(GameManager* _gameManager);
 
+    void updateBulletCount();
     void setMoney(int money);
 
     void start();
@@ -51,10 +75,13 @@ public:
     void render(sf::RenderWindow& window);
     void eventHandler(sf::Event& event);
 
-    void generateShells();
+    void generateBullets();
     void rotateMoveGun(float triggerPull);
 
     void toggleGunVisible(bool state);
-    void toggleLivesVisible(bool state);
+    void toggleBulletsVisible(bool state);
     void toggleMoneyVisible(bool state);
+
+    void toggleLTPrompt(bool state);
+    void toggleRTPrompt(bool state);
 };

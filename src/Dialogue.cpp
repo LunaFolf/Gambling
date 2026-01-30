@@ -54,6 +54,18 @@ void Dialogue::setup(const std::string& spritePath) {
     bubbleSprite.setScale(2.f, 2.f);
     bubbleSprite.setPosition(position.x, position.y);
 
+    continuePromptTexture.loadFromFile("assets/sprites/ps/XButton.png");
+    continuePromptSprite.setTexture(continuePromptTexture);
+    continuePromptSprite.setScale(1.f, 1.f);
+    continuePromptSprite.setColor({255, 255, 255, 0});
+
+    continuePromptText.setFont(font);
+    continuePromptText.setCharacterSize(32);
+    continuePromptText.setFillColor(sf::Color::Transparent);
+    continuePromptText.setOutlineColor(sf::Color::Transparent);
+    continuePromptText.setOutlineThickness(2.f);
+    continuePromptText.setString("Press to continue");
+
     if (!spritePath.empty()) {
         // 41, 37
         spriteTexture.loadFromFile(spritePath);
@@ -81,6 +93,9 @@ void Dialogue::render(sf::RenderWindow& window) {
     window.draw(box);
     if (spriteSprite.getTexture()) window.draw(spriteSprite);
     window.draw(dialogueText);
+
+    window.draw(continuePromptSprite);
+    window.draw(continuePromptText);
 }
 
 void Dialogue::update(const float deltaTime) {
@@ -95,6 +110,13 @@ void Dialogue::update(const float deltaTime) {
 
     if (text.empty()) {
         _isFinishedSpeaking = true;
+
+        if (continuePromptSprite.getColor().a < 255) {
+            continuePromptSprite.setColor({255, 255, 255, 255});
+            continuePromptText.setFillColor(sf::Color::White);
+            continuePromptText.setOutlineColor(sf::Color::Black);
+        }
+
         return;
     };
 
@@ -145,6 +167,9 @@ void Dialogue::update(const float deltaTime) {
         dialogueText.getGlobalBounds().width + 16,
         dialogueText.getGlobalBounds().height + 16
     });
+
+    continuePromptSprite.setPosition(box.getPosition().x + 8, box.getPosition().y + box.getSize().y + 8);
+    continuePromptText.setPosition(continuePromptSprite.getPosition().x + continuePromptSprite.getGlobalBounds().width + 8, continuePromptSprite.getPosition().y - 8);
 
     sound.setPitch(defaultPitch + ((std::rand() % 25) / 100.f) - .125f);
     sound.play();

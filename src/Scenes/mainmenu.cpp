@@ -143,7 +143,7 @@ void MainMenuScene::eventHandler (sf::Event& event) {
     } else if (event.type == sf::Event::JoystickButtonPressed) {
         if (event.joystickButton.button == 0) {
             switch (selectedOption) {
-                case 0: sceneManager->changeScene(3); break;
+                case 0: sceneManager->nextScene(); break;
                 case 1: sceneManager->_quit(); break;
             }
         }

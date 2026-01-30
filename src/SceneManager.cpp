@@ -16,6 +16,14 @@ void SceneManager::changeScene(const int index) {
     scenes[activeSceneIndex]->start();
 }
 
+void SceneManager::nextScene() {
+    this->changeScene(activeSceneIndex + 1);
+}
+
+void SceneManager::previousScene() {
+    this->changeScene(activeSceneIndex - 1);
+}
+
 void SceneManager::update(const float deltaTime) {
     if (activeSceneIndex == -1) return;
     scenes[activeSceneIndex]->update(deltaTime);

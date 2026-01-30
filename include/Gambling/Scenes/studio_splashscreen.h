@@ -8,7 +8,7 @@ public:
     sf::Texture logoTexture;
     sf::Sprite logoSprite;
     bool fadingIn = true;
-    float fadeTime = 1.5f;
+    float fadeTime = 2.5f;
     StudioSplashScreenScene();
 
     void start();
