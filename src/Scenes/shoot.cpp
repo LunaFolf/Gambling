@@ -13,6 +13,8 @@ ShootScene::ShootScene(GameManager* _gameManager) : Scene("Intro") {
 void ShootScene::start() {
     Scene::start();
 
+    gameManager->pauseAmbientSound();
+
     if (gameManager->lastFiredBulletWasLive) {
         liveSound.play();
     } else {

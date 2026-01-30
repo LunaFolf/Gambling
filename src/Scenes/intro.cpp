@@ -3,6 +3,12 @@
 #include "SFML/Window/Event.hpp"
 
 IntroScene::IntroScene() : Scene("Intro") {
+    introSoundBuffer.loadFromFile("assets/sfx/Gregor Quendel - Crowd Cheering Sounds - 10 - Ambience.mp3");
+    introSound.setBuffer(introSoundBuffer);
+    introSound.setLoop(true);
+    introSound.setVolume(2.5f);
+    introSound.play();
+
     this->addDialogue(new Dialogue(
         "I say sir, I've never seen someone fail so terribly as you have!\n"
         "Well, it seems the games are over - time for you to close your tab.\n"
@@ -28,6 +34,7 @@ IntroScene::IntroScene() : Scene("Intro") {
                         1.f,
                         [this]() {
                             this->sceneManager->nextScene();
+                            introSound.stop();
                         }
                     ));
                 },

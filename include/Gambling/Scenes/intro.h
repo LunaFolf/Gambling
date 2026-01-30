@@ -7,6 +7,9 @@
 
 class IntroScene : public Scene {
 public:
+    sf::SoundBuffer introSoundBuffer;
+    sf::Sound introSound;
+
     IntroScene();
 
     void start();

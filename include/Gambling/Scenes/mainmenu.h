@@ -1,4 +1,5 @@
 #pragma once
+#include "Gambling/GameManager.h"
 #include "Gambling/Scene.h"
 #include "SFML/Graphics/Text.hpp"
 #include "SFML/Graphics/Font.hpp"
@@ -7,6 +8,8 @@
 
 class MainMenuScene : public Scene {
 public:
+    GameManager* gameManager;
+
     sf::Texture backgroundTexture;
     sf::Sprite backgroundSprite;
 
@@ -25,7 +28,7 @@ public:
 
     bool fadingIn = true;
     float fadeTime = 1.5f;
-    MainMenuScene();
+    MainMenuScene(GameManager* _gameManager);
 
     void start();
     void update(float deltaTime);

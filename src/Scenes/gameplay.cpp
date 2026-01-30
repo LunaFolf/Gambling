@@ -263,6 +263,8 @@ void GameplayScene::rotateMoveGun(const float triggerPull) {
 
 void GameplayScene::start() {
     Scene::start();
+
+    gameManager->playAmbientSound();
 }
 
 void GameplayScene::update(const float deltaTime) {
@@ -512,6 +514,7 @@ void GameplayScene::eventHandler(sf::Event &event) {
                 rotateMoveGun(pull);
 
                 if (std::abs(pull) < 0.9f) return;
+                playersTurn = false;
                 bullets.erase(bullets.end() - 1);
                 updateBulletCount();
 
@@ -568,6 +571,7 @@ void GameplayScene::eventHandler(sf::Event &event) {
                             "assets/sprites/SpriteEVILRIVAL.png",
                             1.f,
                             [this]() {
+                                playersTurn = true;
                                 toggleGunVisible(true);
                                 toggleLTPrompt(true);
                                 toggleRTPrompt(true);
@@ -584,7 +588,7 @@ void GameplayScene::eventHandler(sf::Event &event) {
                         return;
                     }
                 } else if (pull < -0.9f) {
-                    // Shoot grungler
+                    // Shoot gungler
                     this->sceneManager->nextScene();
                     toggleGunVisible(false);
 

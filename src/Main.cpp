@@ -39,11 +39,13 @@ int main() {
 
 	auto* gameManager = new GameManager();
 
+	gameManager->playAmbientSound();
+
 	auto* sceneManager = new SceneManager(&GAME_WINDOW);
 	sceneManager->addScene(new UONSplashscreenScene());
 	sceneManager->addScene(new StudioSplashScreenScene());
 	sceneManager->addScene(new PEGISplashscreenScene());
-	sceneManager->addScene(new MainMenuScene());
+	sceneManager->addScene(new MainMenuScene(gameManager));
 	sceneManager->addScene(new IntroScene());
 	sceneManager->addScene(new GameplayScene(gameManager));
 	sceneManager->addScene(new ShootScene(gameManager));

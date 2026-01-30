@@ -6,7 +6,9 @@
 #include "SFML/Graphics/Sprite.hpp"
 #include "SFML/Window/Event.hpp"
 
-MainMenuScene::MainMenuScene () : Scene ("Main Menu") {
+MainMenuScene::MainMenuScene (GameManager* _gameManager) : Scene ("Main Menu") {
+    gameManager = _gameManager;
+
     backgroundTexture.loadFromFile("assets/backgrounds/menu.png");
     backgroundSprite.setTexture(backgroundTexture);
     backgroundSprite.setScale(2.f, 2.f);
@@ -54,6 +56,8 @@ MainMenuScene::MainMenuScene () : Scene ("Main Menu") {
 
 void MainMenuScene::start() {
     Scene::start();
+
+    gameManager->stopAmbientSound();
 }
 
 void MainMenuScene::update (const float deltaTime) {

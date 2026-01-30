@@ -5,7 +5,16 @@
 GameManager::GameManager() {
     std::cout << "GameManager created" << std::endl;
     reset();
+
+    ambientSoundBuffer.loadFromFile("assets/sfx/Controlled Chaos - no percussion.mp3");
+    ambientSound.setBuffer(ambientSoundBuffer);
+    ambientSound.setLoop(true);
+    ambientSound.setVolume(2.5f);
 }
+
+void GameManager::playAmbientSound() { ambientSound.play(); }
+void GameManager::stopAmbientSound() { ambientSound.stop(); }
+void GameManager::pauseAmbientSound() { ambientSound.pause(); }
 
 void GameManager::reset() {
     std::cout << "GameManager reset" << std::endl;

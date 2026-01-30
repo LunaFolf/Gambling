@@ -1,7 +1,12 @@
 #pragma once
+#include "SFML/Audio/Sound.hpp"
+#include "SFML/Audio/SoundBuffer.hpp"
 
 class GameManager {
 public:
+    sf::SoundBuffer ambientSoundBuffer;
+    sf::Sound ambientSound;
+
     int shotsFired = 0;
     int rivalsKilled = 0;
     int moneyEarned = 0;
@@ -19,4 +24,8 @@ public:
     void addMoneyEarned(int amount);
     void addItemsUsed(int amount);
     void addBulletsUsed(int amount);
+
+    void playAmbientSound();
+    void pauseAmbientSound();
+    void stopAmbientSound();
 };
