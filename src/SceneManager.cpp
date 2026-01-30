@@ -30,3 +30,7 @@ void SceneManager::eventHandler(sf::Event &event) {
     if (activeSceneIndex == -1) return;
     scenes[activeSceneIndex]->eventHandler(event);
 }
+
+void SceneManager::_quit() {
+    this->gameWindow->close();
+}

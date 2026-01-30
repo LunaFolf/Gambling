@@ -11,6 +11,8 @@ UONSplashscreenScene::UONSplashscreenScene () : Scene ("UON Splashscreen") {
     logoSprite.setColor({255, 255, 255, 0});
 }
 
+
+
 void UONSplashscreenScene::start() {
     Scene::start();
 }
@@ -23,6 +25,7 @@ void UONSplashscreenScene::update (const float deltaTime) {
         this->clock.restart();
     } else if (!fadingIn && this->clock.getElapsedTime().asSeconds() > fadeTime) {
         this->sceneManager->changeScene(1);
+        delete this;
         return;
     }
 

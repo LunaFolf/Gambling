@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 
+#include "Dialogue.h"
 #include "SceneManager.h"
 
 class Scene {
@@ -10,6 +11,8 @@ public:
     sf::Clock clock;
     std::string name;
 
+    std::vector<Dialogue*> dialogues;
+
     Scene(std::string _name);
     void setSceneManager(SceneManager* _sceneManager);
 
@@ -17,4 +20,6 @@ public:
     virtual void update(float deltaTime);
     virtual void render(sf::RenderWindow& window);
     virtual void eventHandler(sf::Event& event);
+
+    void addDialogue(Dialogue* dialogue);
 };

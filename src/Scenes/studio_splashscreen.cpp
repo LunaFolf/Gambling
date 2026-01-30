@@ -23,6 +23,8 @@ void StudioSplashScreenScene::update (const float deltaTime) {
         this->clock.restart();
     } else if (!fadingIn && this->clock.getElapsedTime().asSeconds() > fadeTime) {
         this->sceneManager->changeScene(2);
+        delete this;
+        return;
     }
 
     float percent = this->clock.getElapsedTime().asSeconds() / fadeTime;

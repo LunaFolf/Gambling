@@ -21,4 +21,6 @@ public:
     void changeScene(int index);
 
     void eventHandler(sf::Event& event);
+
+    void _quit();
 };

@@ -3,6 +3,7 @@
 
 #include "Gambling/Scene.h"
 #include "Gambling/Scenes/gameplay.h"
+#include "Gambling/Scenes/mainmenu.h"
 #include "Gambling/Scenes/studio_splashscreen.h"
 #include "Gambling/Scenes/ui_test.h"
 #include "Gambling/Scenes/uon_splashscreen.h"
@@ -15,9 +16,13 @@ int main() {
 	sf::VideoMode VIDEO_MODE(RESOLUTION.x, RESOLUTION.y);
 	sf::RenderWindow GAME_WINDOW(
 		VIDEO_MODE,
-		"5px penis",
+		"INSERT GAME NAME HERE :3",
 		sf::Style::None
 		);
+
+	GAME_WINDOW.display();
+
+	// system("pause");
 
 	GAME_WINDOW.setMouseCursorVisible(false);
 
@@ -30,10 +35,11 @@ int main() {
 	auto* sceneManager = new SceneManager(&GAME_WINDOW);
 	sceneManager->addScene(new UONSplashscreenScene());
 	sceneManager->addScene(new StudioSplashScreenScene());
-	sceneManager->addScene(new UITestScene());
+	// sceneManager->addScene(new UITestScene());
+	sceneManager->addScene(new MainMenuScene());
 	sceneManager->addScene(new GameplayScene());
 
-	sceneManager->changeScene(2);
+	sceneManager->changeScene(0);
 
 	// Main Loop
 	while (GAME_WINDOW.isOpen()) {

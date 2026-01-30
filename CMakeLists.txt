@@ -19,6 +19,8 @@ set(SOURCE_FILES
         src/SceneManager.cpp
         src/Scenes/gameplay.cpp
         src/Scenes/ui_test.cpp
+        src/Scenes/mainmenu.cpp
+        src/Dialogue.cpp
 )
 
 add_executable(Gambling ${SOURCE_FILES})
