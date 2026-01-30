@@ -42,6 +42,10 @@ public:
     sf::Text ltText;
     sf::Text rtText;
 
+    float aiAimDelta = 0.f;
+    bool aiShootSelf = false;
+    bool aiAiming = false;
+
     bool isGunVisible = false;
     bool isBulletsVisible = false;
     bool isMoneyVisible = false;
@@ -49,7 +53,7 @@ public:
     bool isLTPromptVisible = false;
     bool isRTPromptVisible = false;
 
-    bool darkMode = false;
+    bool tutorial = true;
     std::vector<bool> bullets = {};
 
     enum Difficulty {
@@ -63,12 +67,17 @@ public:
     sf::Vector2f getGunDialoguePos() const;
     Difficulty currentDifficulty = easy;
 
-    bool playersTurn = true;
+    bool playersTurn = false;
 
     GameplayScene(GameManager* _gameManager);
 
     void updateBulletCount();
     void setMoney(int money);
+
+    void aiTurn();
+    void aiShoot();
+
+    void doubleOrNothingPrompt();
 
     void start();
     void update(float deltaTime);

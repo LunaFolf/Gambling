@@ -96,6 +96,7 @@ GameplayScene::GameplayScene(GameManager* _gameManager) : Scene("Main Gameplay")
         [this]() {
             toggleMoneyVisible(true);
             setMoney(-1000);
+            setMoney(-1);
 
             this->addDialogue(new Dialogue(
                 "This is your debt...\n"
@@ -162,6 +163,9 @@ GameplayScene::GameplayScene(GameManager* _gameManager) : Scene("Main Gameplay")
                                                                 [this]() {
                                                                     toggleLTPrompt(true);
                                                                     toggleRTPrompt(true);
+
+                                                                    tutorial = false;
+                                                                    playersTurn = true;
                                                                 }
                                                             ));
                                                         }
@@ -225,26 +229,25 @@ void GameplayScene::generateBullets() {
 }
 
 void GameplayScene::rotateMoveGun(const float triggerPull) {
-    if (!isGunVisible) return;
     // 1 = self, -1 = rival, 0 = none
 
     float absolutePull = std::abs(triggerPull);
 
     if (absolutePull > 0.f) {
         sf::Vector2f targetPos = {720.f / 2.f, 576.f / 2.f}; // Center of screen
-        sf::Vector2f& defaultPos = playersTurn ? playerGunPos : rivalGunPos;
+        sf::Vector2f& defaultPos = (tutorial || playersTurn) ? playerGunPos : rivalGunPos;
         // transpose from default position, to center, depending on how much the trigger is pulled
         sf::Vector2f delta = targetPos - defaultPos;
         sf::Vector2f newPos = defaultPos + (delta * absolutePull);
         gunSprite.setPosition(newPos);
-        float selfAngle = playersTurn ? 90.f : -90.f;
+        float selfAngle = (tutorial || playersTurn) ? 90.f : -90.f;
         float targetAngle = (triggerPull > 0.f) ? 180.f : 0.f;
         float newAngle = selfAngle + (targetAngle - selfAngle) * absolutePull;
         gunSprite.setRotation(newAngle);
     } else {
-        sf::Vector2f& defaultPos = playersTurn ? playerGunPos : rivalGunPos;
+        sf::Vector2f& defaultPos = (tutorial || playersTurn) ? playerGunPos : rivalGunPos;
         gunSprite.setPosition(defaultPos);
-        float selfAngle = playersTurn ? 90.f : -90.f;
+        float selfAngle = (tutorial || playersTurn) ? 90.f : -90.f;
         gunSprite.setRotation(selfAngle);
     }
 }
@@ -255,6 +258,19 @@ void GameplayScene::start() {
 
 void GameplayScene::update(const float deltaTime) {
     Scene::update(deltaTime);
+
+    if (aiAiming) {
+        rotateMoveGun(aiAimDelta);
+        if (aiShootSelf) aiAimDelta -= deltaTime;
+        else aiAimDelta += deltaTime;
+
+        if (std::abs(aiAimDelta) >= 1.f) {
+            aiAiming = false;
+            aiAimDelta = 0.f;
+
+            aiShoot();
+        }
+    }
 
     if (displayMoney != actualMoney) {
         moneyDeltaCount += deltaTime;
@@ -272,15 +288,15 @@ void GameplayScene::update(const float deltaTime) {
 void GameplayScene::render(sf::RenderWindow& window) {
     window.draw(backgroundSprite);
 
-    Scene::render(window);
-
-    window.draw(moneySprite);
-    window.draw(moneyText);
-
     window.draw(bulletsSprite);
     window.draw(bulletsText);
 
     window.draw(gunSprite);
+
+    Scene::render(window);
+
+    window.draw(moneySprite);
+    window.draw(moneyText);
 
     window.draw(ltSprite);
     window.draw(ltText);
@@ -289,25 +305,167 @@ void GameplayScene::render(sf::RenderWindow& window) {
     window.draw(rtText);
 }
 
+void GameplayScene::doubleOrNothingPrompt() {
+    toggleLTPrompt(false);
+    toggleRTPrompt(false);
+    toggleGunVisible(false);
+    toggleBulletsVisible(false);
+    toggleMoneyVisible(false);
+
+    playersTurn = false;
+    tutorial = true;
+
+    this->addDialogue(new Dialogue(
+        "Huh... you actually cleared your debt...\n"
+        "I'll be honest I wasn't expecting that...\n"
+        "Well a deals a deal, you can leave...\n"
+        "Unless... Double or Nothing?",
+        {8, 8},
+        Dialogue::Voice::evilgungler,
+        "assets/sprites/SpriteEVILRIVAL.png",
+        1.f,
+        [this]() {
+
+        }
+    ));
+}
+
+void GameplayScene::aiTurn() {
+    rotateMoveGun(0);
+    toggleGunVisible(true);
+
+    this->addDialogue(new Dialogue(
+        "Looks like it's my turn...",
+        {8, 8},
+        Dialogue::Voice::evilgungler,
+        "assets/sprites/SpriteEVILRIVAL.png",
+        1.f,
+        [this]() {
+            aiShootSelf = rand() % 2 == 0;
+            std::cout << "shooting: " << (aiShootSelf ?"self":"rival") << std::endl;
+            aiAiming = true;
+        }
+    ));
+}
+
+void GameplayScene::aiShoot() {
+    bool bulletIsLive = bullets.size() ? bullets.back() : false;
+
+    bullets.erase(bullets.end() - 1);
+    updateBulletCount();
+
+    this->gameManager->setLastFiredBulletWasLive(bulletIsLive);
+
+    if (aiShootSelf) {
+        // Shoot self
+        this->sceneManager->nextScene();
+        toggleGunVisible(false);
+
+        if (bulletIsLive) {
+            gameManager->addShotsFired(1);
+            gameManager->addMoneyEarned(100);
+            gameManager->addRivalsKilled(1);
+
+            actualMoney += 100;
+            setMoney(actualMoney);
+
+            if (actualMoney >= 0) {
+                doubleOrNothingPrompt();
+                return;
+            }
+
+            this->addDialogue(new Dialogue(
+                "F*@!...\n"
+                "Unfortunately for you, we have more gunglers than you can count...\n"
+                "BRING IN GUNGLER #" + std::to_string(gameManager->rivalsKilled + 1) + "!",
+                {8, 8},
+                Dialogue::Voice::evilgungler,
+                "assets/sprites/SpriteEVILRIVAL.png",
+                1.f,
+                [this]() {
+                    playersTurn = true;
+                    toggleLTPrompt(true);
+                    toggleRTPrompt(true);
+                    toggleGunVisible(true);
+                }
+            ));
+        } else {
+            this->addDialogue(new Dialogue(
+                "Hmmm... You're turn, cretin...",
+                {8, 8},
+                Dialogue::Voice::evilgungler,
+                "assets/sprites/SpriteEVILRIVAL.png",
+                1.f,
+                [this]() {
+                    playersTurn = true;
+                    toggleLTPrompt(true);
+                    toggleRTPrompt(true);
+                    toggleGunVisible(true);
+                }
+            ));
+        }
+    } else {
+        // Shoot player
+        this->sceneManager->nextScene();
+        toggleGunVisible(false);
+
+        if (bulletIsLive) {
+            gameManager->addShotsFired(1);
+
+            gameManager->addMoneyEarned(-200);
+
+            actualMoney -= 200;
+            setMoney(actualMoney);
+
+            if (actualMoney >= 0) {
+                doubleOrNothingPrompt();
+                return;
+            }
+
+            this->addDialogue(new Dialogue(
+                "* Z A P *\n"
+                "What? You thought we'd let you get out your debt THAT easy?\n"
+                "Finish the game!\n"
+                "Oh, by the way, that revive cost you an extra $200.",
+                {8, 8},
+                Dialogue::Voice::evilgungler,
+                "assets/sprites/SpriteEVILRIVAL.png",
+                1.f,
+                [this]() {
+                    playersTurn = true;
+                    toggleLTPrompt(true);
+                    toggleRTPrompt(true);
+                    toggleMoneyVisible(true);
+                }
+            ));
+        } else {
+            this->addDialogue(new Dialogue(
+                "Huh... must be your lucky day...",
+                {8, 8},
+                Dialogue::Voice::evilgungler,
+                "assets/sprites/SpriteEVILRIVAL.png",
+                1.f,
+                [this]() {
+                    playersTurn = true;
+                    toggleLTPrompt(true);
+                    toggleRTPrompt(true);
+                    toggleMoneyVisible(true);
+                }
+            ));
+        }
+    }
+
+    if (bullets.size() < 1) generateBullets();
+
+    rotateMoveGun(0);
+}
+
 void GameplayScene::eventHandler(sf::Event &event) {
     Scene::eventHandler(event);
 
-    if (event.type == sf::Event::KeyPressed) {
-        switch (event.key.code) {
-            case sf::Keyboard::Space:
-                generateBullets();
-                break;
-            case sf::Keyboard::Up:
-                currentDifficulty = static_cast<Difficulty>(currentDifficulty * 2);
-                break;
-            case sf::Keyboard::Down:
-                currentDifficulty = static_cast<Difficulty>(currentDifficulty / 2);
-                break;
-            default:
-                break;
-        }
-    }
-    else if (event.type == sf::Event::JoystickMoved) {
+    if (tutorial || !playersTurn) return;
+
+     if (event.type == sf::Event::JoystickMoved) {
         const float pull = event.joystickMove.position / 100;
         bool bulletIsLive = bullets.size() ? bullets.back() : false;
 
@@ -328,11 +486,78 @@ void GameplayScene::eventHandler(sf::Event &event) {
 
                 this->gameManager->setLastFiredBulletWasLive(bulletIsLive);
 
+                toggleLTPrompt(false);
+                toggleRTPrompt(false);
+                
+                gameManager->addBulletsUsed(1);
+
                 if (pull > 0.9f) {
+                    // Shoot self
                     this->sceneManager->nextScene();
+                    toggleGunVisible(false);
+
+                    if (bulletIsLive) {
+                        gameManager->addShotsFired(1);
+                    } else {
+                        gameManager->addMoneyEarned(200);
+
+                        actualMoney += 200;
+                        setMoney(actualMoney);
+                    }
+
+                    if (actualMoney >= 0) {
+                        doubleOrNothingPrompt();
+                        return;
+                    }
                 } else if (pull < -0.9f) {
+                    // Shoot grungler
                     this->sceneManager->nextScene();
+                    toggleGunVisible(false);
+
+                    if (bulletIsLive) {
+                        gameManager->addShotsFired(1);
+                        gameManager->addMoneyEarned(100);
+                        gameManager->addRivalsKilled(1);
+                        
+                        actualMoney += 100;
+                        setMoney(actualMoney);
+
+                        if (actualMoney >= 0) {
+                            doubleOrNothingPrompt();
+                            return;
+                        }
+
+                        this->addDialogue(new Dialogue(
+                            "F*@!...\n"
+                            "Unfortunately for you, we have more gunglers than you can count...\n"
+                            "BRING IN GUNGLER #" + std::to_string(gameManager->rivalsKilled + 1) + "!",
+                            {8, 8},
+                            Dialogue::Voice::evilgungler,
+                            "assets/sprites/SpriteEVILRIVAL.png",
+                            1.f,
+                            [this]() {
+                                playersTurn = false;
+                                aiTurn();
+                            }
+                        ));
+                    } else {
+                        this->addDialogue(new Dialogue(
+                            "Ha, unlucky...",
+                            {8, 8},
+                            Dialogue::Voice::evilgungler,
+                            "assets/sprites/SpriteEVILRIVAL.png",
+                            1.f,
+                            [this]() {
+                                playersTurn = false;
+                                aiTurn();
+                            }
+                        ));
+                    }
                 }
+
+                if (bullets.size() < 1) generateBullets();
+
+                rotateMoveGun(0);
 
                 break;
             case sf::Joystick::U: // Right stick, x
@@ -350,6 +575,8 @@ void GameplayScene::eventHandler(sf::Event &event) {
 
 void GameplayScene::toggleGunVisible(const bool state) {
     isGunVisible = state;
+
+    rotateMoveGun(0);
 
     if (isGunVisible && gunSprite.getColor().a < 255) gunSprite.setColor({255, 255, 255, 255});
     else if (!isGunVisible && gunSprite.getColor().a > 0) gunSprite.setColor({255, 255, 255, 0});
