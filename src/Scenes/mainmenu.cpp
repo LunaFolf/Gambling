@@ -26,6 +26,7 @@ MainMenuScene::MainMenuScene (GameManager* _gameManager) : Scene ("Main Menu") {
     selectPromptSprite.setColor({255, 255, 255, 0});
 
     font.loadFromFile("assets/fonts/ithaca.ttf");
+    font.setSmooth(false);
 
     menuTexts.reserve(2);
 
@@ -57,7 +58,7 @@ MainMenuScene::MainMenuScene (GameManager* _gameManager) : Scene ("Main Menu") {
 void MainMenuScene::start() {
     Scene::start();
 
-    gameManager->stopAmbientSound();
+    // gameManager->stopAmbientSound();
 }
 
 void MainMenuScene::update (const float deltaTime) {
@@ -109,9 +110,10 @@ void MainMenuScene::render (sf::RenderWindow& window) {
 void MainMenuScene::eventHandler (sf::Event& event) {
     if (fadingIn) return;
 
+    int newSelectedOption = selectedOption;
+
     if (event.type == sf::Event::JoystickMoved) {
         const float pull = event.joystickMove.position / 100;
-        int newSelectedOption = selectedOption;
 
         switch (event.joystickMove.axis) {
             case sf::Joystick::X: // Left stick, x
@@ -144,12 +146,30 @@ void MainMenuScene::eventHandler (sf::Event& event) {
                 break;
             default: break;
         }
-    } else if (event.type == sf::Event::JoystickButtonPressed) {
-        if (event.joystickButton.button == 0) {
+    } else if (event.type == sf::Event::JoystickButtonPressed || event.type == sf::Event::KeyPressed) {
+        if (event.joystickButton.button == 0 || event.key.code == sf::Keyboard::Enter) {
             switch (selectedOption) {
                 case 0: sceneManager->nextScene(); break;
                 case 1: sceneManager->_quit(); break;
             }
+
+            return;
+        }
+
+        if (event.key.code == sf::Keyboard::Right) {
+            if (selectedOption < 1) newSelectedOption = 1;
+            else newSelectedOption = 0;
+        } else if (event.key.code == sf::Keyboard::Left) {
+            if (selectedOption > 0) newSelectedOption = 0;
+            else newSelectedOption = 1;
+        }
+
+        if (newSelectedOption != selectedOption) {
+            menuTexts[selectedOption].setFillColor(sf::Color::White);
+            menuTexts[selectedOption].setOutlineColor(sf::Color::Black);
+            selectedOption = newSelectedOption;
+            menuTexts[selectedOption].setFillColor(sf::Color::Black);
+            menuTexts[selectedOption].setOutlineColor(sf::Color::White);
         }
     }
 

@@ -16,4 +16,6 @@ public:
     void update(float deltaTime);
 
     void render(sf::RenderWindow& window);
+
+    void eventHandler(sf::Event& event);
 };

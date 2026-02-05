@@ -45,6 +45,7 @@ private:
     Voice chosenVoice = gungler;
 
     bool _mustFinishDialogueToAdvance = true;
+    bool _skipDialogue = false;
 
     float autoSkipDelta = 0.f;
     bool _autoSkip = false;

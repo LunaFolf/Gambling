@@ -2,6 +2,7 @@
 
 #include "SFML/Graphics/Texture.hpp"
 #include "SFML/Graphics/Sprite.hpp"
+#include "SFML/Window/Event.hpp"
 
 StudioSplashScreenScene::StudioSplashScreenScene () : Scene ("Studio Splashscreen") {
     logoTexture.loadFromFile("assets/sprites/StudioLogo.png");
@@ -37,4 +38,13 @@ void StudioSplashScreenScene::update (const float deltaTime) {
 void StudioSplashScreenScene::render (sf::RenderWindow& window) {
     Scene::render (window);
     window.draw(logoSprite);
+}
+
+void StudioSplashScreenScene::eventHandler (sf::Event& event) {
+    Scene::eventHandler (event);
+
+    if (event.type == sf::Event::JoystickButtonPressed || event.type == sf::Event::KeyPressed) {
+        this->sceneManager->nextScene();
+        delete this;
+    }
 }

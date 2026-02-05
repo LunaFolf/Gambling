@@ -15,7 +15,7 @@ GameplayScene::GameplayScene(GameManager* _gameManager) : Scene("Main Gameplay")
     reloadSound.setBuffer(reloadBuffer);
 
     font.loadFromFile("assets/fonts/ithaca.ttf");
-
+    font.setSmooth(false);
     ltTexture.loadFromFile("assets/sprites/ps/LeftTrigger2.png");
     ltSprite.setTexture(ltTexture);
     ltSprite.setScale(2.f, 2.f);
@@ -189,7 +189,7 @@ GameplayScene::GameplayScene(GameManager* _gameManager) : Scene("Main Gameplay")
     ));
 
     setMoney(0);
-    currentDifficulty = easy;
+    currentDifficulty = medium;
 }
 
 sf::Vector2f GameplayScene::getBulletsDialoguePos() const {
@@ -217,7 +217,6 @@ void GameplayScene::setMoney(const int money) {
 
 void GameplayScene::generateBullets() {
     bullets.clear();
-    bullets.reserve(currentDifficulty);
 
     for (int i = currentDifficulty - 1; i >= 0; i--) {
         bool isBulletLive = rand() % 2 == 0;
@@ -265,6 +264,7 @@ void GameplayScene::start() {
     Scene::start();
 
     gameManager->playAmbientSound();
+    bullets.reserve(currentDifficulty);
 }
 
 void GameplayScene::update(const float deltaTime) {
@@ -498,9 +498,16 @@ void GameplayScene::eventHandler(sf::Event &event) {
 
     if (tutorial || !playersTurn) return;
 
-     if (event.type == sf::Event::JoystickMoved) {
-        const float pull = event.joystickMove.position / 100;
+     if (event.type == sf::Event::JoystickMoved || event.type == sf::Event::MouseButtonPressed) {
+        float pull = event.joystickMove.position / 100;
         bool bulletIsLive = bullets.size() ? bullets.back() : false;
+
+         if (event.mouseButton.button == sf::Mouse::Button::Left) pull = 1.f;
+         else if (event.mouseButton.button == sf::Mouse::Button::Right) pull = -1.f;
+
+         if (event.type == sf::Event::MouseButtonPressed) {
+             event.joystickMove.axis = sf::Joystick::Z; // Hacky, yes... but functional... for now.
+         }
 
         switch (event.joystickMove.axis) {
             case sf::Joystick::X: // Left stick, x

@@ -48,6 +48,7 @@ target_link_libraries(Gambling
         sfml-window
         sfml-system
         sfml-audio
+        steam_api64
 )
 
 if (WIN32)

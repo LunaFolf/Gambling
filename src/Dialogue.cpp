@@ -20,7 +20,7 @@ Dialogue::Dialogue(
     defaultPitch = pitch;
     chosenVoice = voice;
     onFinishCallback = onFinish;
-    _autoSkip = autoSkip;
+    _autoSkip = false;
 
     setup(spritePath);
 }
@@ -40,7 +40,7 @@ Dialogue::Dialogue(
     defaultPitch = pitch;
     chosenVoice = voice;
     onFinishCallback = onFinish;
-    _autoSkip = autoSkip;
+    _autoSkip = false;
 
     setup(spritePath);
 }
@@ -126,7 +126,7 @@ void Dialogue::update(const float deltaTime) {
     };
 
     deltaCount += deltaTime;
-    if (deltaCount < (charTime + pausedTime)) return;
+    if (!_skipDialogue && deltaCount < (charTime + pausedTime)) return;
     deltaCount = 0;
     pausedTime = 0;
 
@@ -194,9 +194,12 @@ std::string Dialogue::getText() {
 }
 
 void Dialogue::eventHandler(sf::Event &event) {
-    if ((_mustFinishDialogueToAdvance && !_isFinishedSpeaking) || _playerHasAdvanced) return;
+    if (_playerHasAdvanced) return;
 
-    if (event.type == sf::Event::JoystickButtonPressed) {
-        if (event.joystickButton.button == 0) _playerHasAdvanced = true;
+    if (event.type == sf::Event::JoystickButtonPressed || event.type == sf::Event::KeyPressed) {
+        if (event.joystickButton.button == 0 || event.key.code == sf::Keyboard::Enter) {
+            if (!text.empty()) _skipDialogue = true;
+            else if (_mustFinishDialogueToAdvance && _isFinishedSpeaking) _playerHasAdvanced = true;
+        }
     }
 }

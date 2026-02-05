@@ -1,5 +1,6 @@
 #include <Gambling/Scenes/uon_splashscreen.h>
 
+#include "../../cmake-build-debug/_deps/sfml-src/include/SFML/Window/Event.hpp"
 #include "SFML/Graphics/Texture.hpp"
 #include "SFML/Graphics/Sprite.hpp"
 
@@ -40,4 +41,13 @@ void UONSplashscreenScene::update (const float deltaTime) {
 void UONSplashscreenScene::render (sf::RenderWindow& window) {
     Scene::render (window);
     window.draw(logoSprite);
+}
+
+void UONSplashscreenScene::eventHandler (sf::Event& event) {
+    Scene::eventHandler (event);
+
+    if (event.type == sf::Event::JoystickButtonPressed || event.type == sf::Event::KeyPressed) {
+        this->sceneManager->nextScene();
+        delete this;
+    }
 }

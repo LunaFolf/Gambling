@@ -2,6 +2,7 @@
 
 #include "SFML/Graphics/Texture.hpp"
 #include "SFML/Graphics/Sprite.hpp"
+#include "SFML/Window/Event.hpp"
 
 PEGISplashscreenScene::PEGISplashscreenScene () : Scene ("PEGI Splashscreen") {
     logoTexture.loadFromFile("assets/sprites/PEGI/AllTogether.png");
@@ -39,4 +40,13 @@ void PEGISplashscreenScene::update (const float deltaTime) {
 void PEGISplashscreenScene::render (sf::RenderWindow& window) {
     Scene::render (window);
     window.draw(logoSprite);
+}
+
+void PEGISplashscreenScene::eventHandler (sf::Event& event) {
+    Scene::eventHandler (event);
+
+    if (event.type == sf::Event::JoystickButtonPressed || event.type == sf::Event::KeyPressed) {
+        this->sceneManager->nextScene();
+        delete this;
+    }
 }

@@ -3,10 +3,12 @@
 #include <Gambling/Scenes/ui_test.h>
 
 #include "Gambling/Dialogue.h"
-#include "Gambling/Dialogue.h"
-#include "Gambling/Dialogue.h"
 #include "SFML/Graphics/Sprite.hpp"
 #include "SFML/Graphics/Texture.hpp"
+#include "steam/isteamfriends.h"
+#include "steam/isteamremotestorage.h"
+#include "steam/isteamscreenshots.h"
+#include "steam/isteamuserstats.h"
 
 UITestScene::UITestScene() : Scene("UI Test") {
     int counter = 0;
@@ -25,27 +27,31 @@ UITestScene::UITestScene() : Scene("UI Test") {
 
     // system("pause");
 
-    // this->addDialogue(new Dialogue(
-    //     "WOW! Look at this!\n"
-    //     "This Dialogue, starts halfway on the screen, yet is still smart enough to stop before the end of the window!\n"
-    //     "Isn't Luna awesome? ALL PRAISE LUNA!\n"
-    //     ":3",
-    // {8, 100},
-    // 1,
-    // Dialogue::Voice::gungler,
-    // "assets/sprites/SpriteGOODRIVAL.png"
-    // ));
-    //
-    // this->addDialogue(new Dialogue(
-    //     "Hey, you.\n"
-    //     "You're finally awake.\n"
-    //     "You were trying to cross the border, right?\n"
-    //     "Walked right into that Imperial ambush, same as us, and that thief over there...",
-    //     {8, 576.f * 0.75},
-    //     1,
-    //     Dialogue::Voice::evilgungler,
-    //     "assets/sprites/SpriteEVILRIVAL.png"
-    //     ));
+    const char *name = SteamFriends()->GetPersonaName();
+    const int friendCount = SteamFriends()->GetFriendCount(k_EFriendFlagImmediate);
+
+    this->addDialogue(new Dialogue(
+        "Hello, " + std::string(name) + "... How are you doing today?\n"
+        "Looks like you have about... " + std::to_string(friendCount) + " friends!\n"
+        "Want me to give you a free achievement? Press enter!\n"
+        ":3",
+{8, 100},
+        Dialogue::Voice::evilgungler,
+        "assets/sans.png",
+        1,
+        [this]() {
+            SteamUserStats()->SetAchievement("ACH_TRAVEL_FAR_SINGLE");
+            SteamUserStats()->StoreStats();
+
+            this->addDialogue(new Dialogue(
+                "Achievement unlocked! Congrats!\n"
+                "Wasn't that easy? :3",
+                {8, 100},
+                Dialogue::Voice::evilgungler,
+                "assets/sans.png"
+            ));
+        }
+        ));
 }
 
 void UITestScene::start() {

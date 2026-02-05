@@ -9,7 +9,7 @@ GameManager::GameManager() {
     ambientSoundBuffer.loadFromFile("assets/sfx/Controlled Chaos - no percussion.mp3");
     ambientSound.setBuffer(ambientSoundBuffer);
     ambientSound.setLoop(true);
-    ambientSound.setVolume(2.5f);
+    ambientSound.setVolume(1.125f);
 }
 
 void GameManager::playAmbientSound() { ambientSound.play(); }

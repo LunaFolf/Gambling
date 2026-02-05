@@ -13,21 +13,55 @@
 #include "Gambling/Scenes/ui_test.h"
 #include "Gambling/Scenes/uon_splashscreen.h"
 
+#include "steam/steam_api.h"
+
 
 using namespace std;
 
 int main() {
-	sf::Vector2i RESOLUTION(720.f, 576.f);
-	sf::VideoMode VIDEO_MODE(RESOLUTION.x, RESOLUTION.y);
+	SteamAPI_Init();
+
+	int numAchievements = SteamUserStats()->GetNumAchievements();
+	for ( int i = 0; i < numAchievements; ++i )
+	{
+		const char *achName = SteamUserStats()->GetAchievementName( i );
+		if ( achName && achName != "ACH_WIN_100_GAMES" )
+		{
+			SteamUserStats()->ClearAchievement("ACH_TRAVEL_FAR_SINGLE");
+		}
+	}
+
+	SteamUserStats()->StoreStats();
+
+	sf::Vector2u RESOLUTION(720, 576);
+	sf::VideoMode VIDEO_MODE = sf::VideoMode::getDesktopMode();
 	sf::RenderWindow GAME_WINDOW(
 		VIDEO_MODE,
-		"INSERT GAME NAME HERE :3",
+		"Chamberlocked",
 		sf::Style::None
 		);
 
-	GAME_WINDOW.display();
+	sf::View GAME_VIEW(
+		sf::FloatRect(0.f, 0.f, RESOLUTION.x, RESOLUTION.y)
+	);
 
-	// system("pause");
+	float windowRatio = static_cast<float>(VIDEO_MODE.width) / static_cast<float>(VIDEO_MODE.height);
+	float viewRatio = static_cast<float>(RESOLUTION.x) / static_cast<float>(RESOLUTION.y);
+	float sizeX = 1.f, sizeY = 1.f, posX = 0.f, posY = 0.f;
+
+	if (windowRatio > viewRatio)
+	{
+		sizeX = viewRatio / windowRatio;
+		posX = (1.f - sizeX) / 2.f;
+	}
+	else
+	{
+		sizeY = windowRatio / viewRatio;
+		posY = (1.f - sizeY) / 2.f;
+	}
+
+	GAME_VIEW.setViewport({posX, posY, sizeX, sizeY});
+	GAME_WINDOW.setView(GAME_VIEW);
 
 	GAME_WINDOW.setMouseCursorVisible(false);
 
@@ -45,6 +79,7 @@ int main() {
 	sceneManager->addScene(new UONSplashscreenScene());
 	sceneManager->addScene(new StudioSplashScreenScene());
 	sceneManager->addScene(new PEGISplashscreenScene());
+	// sceneManager->addScene(new UITestScene());
 	sceneManager->addScene(new MainMenuScene(gameManager));
 	sceneManager->addScene(new IntroScene());
 	sceneManager->addScene(new GameplayScene(gameManager));
